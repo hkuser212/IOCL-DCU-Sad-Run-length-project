@@ -110,4 +110,6 @@ _Machine Learning Intern, Indian Oil Corporation Limited (IOCL)_
 📫 [Email](mailto:harshk210804@gmail.com) · 🌐 [GitHub](https://github.com/hkuser212)
 
 
+> Note: This project was independently designed and executed by Harsh Kumar during his 2025 summer internship at IOCL. 
+> Initial results were shared with the Chemical Engineering team for validation, and the original forecasting pipeline was developed without external codebase assistance.
 
