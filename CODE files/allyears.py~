@@ -1,0 +1,152 @@
+import pandas as pd
+
+# # Normalized lowercase mapping
+# column_mapping = {
+#     'timestamp': "timestamp",
+#     'kg/cm2': "Coil_Inlet_Pressure_Pass1",
+#     'kg/cm2.1': "Coil_Inlet_Pressure_Pass2",
+#     'kg/cm2.2': "Coil_Inlet_Pressure_Pass3",
+#     'kg/cm2.3': "Coil_Inlet_Pressure_Pass4",
+#     'unnamed: 7': "FeedFlow_Pass1",
+#     'unnamed: 8': "FeedFlow_Pass2",
+#     'unnamed: 9': "FeedFlow_Pass3",
+#     'unnamed: 10': "FeedFlow_Pass4",
+#     'degc': "COT_Pass1",
+#     'degc.1': "COT_Pass2",
+#     'degc.2': "COT_Pass3",
+#     'degc.3': "COT_Pass4",
+#     'kg/cm2.4': "COIL_dP_Pass1",
+#     'kg/cm2.5': "COIL_dP_Pass2",
+#     'kg/cm2.6': "COIL_dP_Pass3",
+#     'kg/cm2.7': "COIL_dP_Pass4",
+#     'kg/hr': "BFW_Injection_Pass1",
+#     'kg/hr.1': "BFW_Injection_Pass2",
+#     'kg/hr.2': "BFW_Injection_Pass3",
+#     'kg/hr.3': "BFW_Injection_Pass4",
+#     'degc.4': "MAX_SkinTemp_Pass1",
+#     'degc.5': "Max_SkinTemp_Pass2",
+#     'degc.6': "Max_SkinTemp_Pass3",
+#     'degc.7': "Max_SkinTemp_Pass4"
+# }
+#
+# def load_and_clean(file):
+#     try:
+#
+#         df = pd.read_csv(file, header=4)
+#         print(f"📄 Columns in {file}: {df.columns.tolist()}")
+#
+#         df.columns = df.columns.str.strip().str.lower()  # Normalize columns
+#
+#         df = df.rename(columns=column_mapping)
+#
+#         df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')
+#         print(f"✅ Loaded {file} — Rows: {df.shape[0]}")
+#         return df
+#
+#     except Exception as e:
+#         print(f"🚫 Failed to load {file}: {str(e)}")
+#         return None
+#
+# # File list
+# files = ['merged-csv-files.csv']
+#
+# # Load all valid files
+# dfs = [load_and_clean(f) for f in files]
+# dfs = [df for df in dfs if df is not None and not df.empty]
+#
+# # Concatenate
+# if dfs:
+#     df_all_years = pd.concat(dfs, ignore_index=True).reset_index(drop=True)
+#     df_all_years.to_csv('allyears_cleaned.csv', index=False)
+#     print("✅ Combined cleaned data saved to 'allyears_cleaned.csv'")
+#     print("🔎 Shape:", df_all_years.shape)
+#     print(df_all_years[['timestamp']].head())
+# else:
+#     print("🚫 No valid dataframes to concatenate.")
+
+
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Step 1: Load the data
+df_raw = pd.read_csv('merged-csv-files.csv', header=4, skiprows=[0, 1, 2, 3])
+
+# Step 2: Rename columns for consistency
+renamed_columns = {
+    df_raw.columns[2]: "timestamp",
+    df_raw.columns[3]: "Coil_Inlet_Pressure_Pass1",
+    df_raw.columns[4]: "Coil_Inlet_Pressure_Pass2",
+    df_raw.columns[5]: "Coil_Inlet_Pressure_Pass3",
+    df_raw.columns[6]: "Coil_Inlet_Pressure_Pass4",
+    df_raw.columns[7]: "FeedFlow_Pass1",
+    df_raw.columns[8]: "FeedFlow_Pass2",
+    df_raw.columns[9]: "FeedFlow_Pass3",
+    df_raw.columns[10]: "FeedFlow_Pass4",
+    df_raw.columns[11]: "COT_Pass1",
+    df_raw.columns[12]: "COT_Pass2",
+    df_raw.columns[13]: "COT_Pass3",
+    df_raw.columns[14]: "COT_Pass4",
+    df_raw.columns[15]: "COIL_dP_Pass1",
+    df_raw.columns[16]: "COIL_dP_Pass2",
+    df_raw.columns[17]: "COIL_dP_Pass3",
+    df_raw.columns[18]: "COIL_dP_Pass4",
+    df_raw.columns[19]: "BFW_Injection_Pass1",
+    df_raw.columns[20]: "BFW_Injection_Pass2",
+    df_raw.columns[21]: "BFW_Injection_Pass3",
+    df_raw.columns[22]: "BFW_Injection_Pass4",
+    df_raw.columns[23]: "MAX_SkinTemp_Pass1",
+    df_raw.columns[24]: "Max_SkinTemp_Pass2",
+    df_raw.columns[25]: "Max_SkinTemp_Pass3",
+    df_raw.columns[26]: "Max_SkinTemp_Pass4",
+}
+df_renamed = df_raw.rename(columns=renamed_columns)
+
+# Step 3: Drop unnecessary columns and clean timestamp
+df_cleaned = df_renamed.drop(columns=[df_raw.columns[0], df_raw.columns[1]])
+df_cleaned['timestamp'] = pd.to_datetime(df_cleaned['timestamp'], errors='coerce')
+df_cleaned = df_cleaned.dropna(subset=['timestamp']).reset_index(drop=True)
+
+# Step 4: Set timestamp as index for time series
+df_cleaned.set_index('timestamp', inplace=True)
+
+# Optional: Sort by datetime
+df_cleaned = df_cleaned.sort_index()
+
+# ✅ Now it's a time series dataframe
+print(df_cleaned.info())
+print(df_cleaned.head())
+
+# Example: Plot COIL_dP_Pass3 across time
+# Step 4: Set timestamp as index for time series
+
+
+# 🔧 Convert all data columns to numeric
+df_cleaned = df_cleaned.apply(pd.to_numeric, errors='coerce')
+
+# Drop rows with NaN in the column you want to plot
+df_cleaned = df_cleaned.dropna(subset=['COIL_dP_Pass1'])
+
+# ✅ Plot
+
+# Drop timestamp column from plotting
+features_to_plot = df_cleaned.drop(columns=['timestamp']).columns
+
+# Create subplots
+n = len(features_to_plot)
+fig, axes = plt.subplots(n, 1, figsize=(15, 4*n), sharex=True)
+
+# Loop through features
+for i, col in enumerate(features_to_plot):
+    axes[i].plot(df_cleaned['timestamp'], df_cleaned[col])
+    axes[i].set_ylabel(col)
+    axes[i].grid(True)
+
+axes[0].set_title("Time Series of All Furnace Features (2021–2024)", fontsize=16)
+plt.xlabel("Timestamp")
+plt.tight_layout()
+plt.show()
+
+

@@ -1,0 +1,341 @@
+#
+# # Modified and Annotated Version of Your Code
+# #2022 model , 2025 data
+# import pandas as pd
+# import numpy as np
+# import seaborn as sns
+# import matplotlib.pyplot as plt
+# import joblib
+# from sklearn.linear_model import LinearRegression
+#
+# # ------------------------------
+# # Step 1: Load and preprocess 2025 data
+# # ------------------------------
+# df_raw = pd.read_csv('DCU - 2025.csv', header=4, skiprows=[0, 1, 2, 3])
+#
+# renamed_columns = {
+#     df_raw.columns[2]: "timestamp",
+#     df_raw.columns[3]: "Coil_Inlet_Pressure_Pass1",
+#     df_raw.columns[4]: "Coil_Inlet_Pressure_Pass2",
+#     df_raw.columns[5]: "Coil_Inlet_Pressure_Pass3",
+#     df_raw.columns[6]: "Coil_Inlet_Pressure_Pass4",
+#     df_raw.columns[7]: "FeedFlow_Pass1",
+#     df_raw.columns[8]: "FeedFlow_Pass2",
+#     df_raw.columns[9]: "FeedFlow_Pass3",
+#     df_raw.columns[10]: "FeedFlow_Pass4",
+#     df_raw.columns[11]: "COT_Pass1",
+#     df_raw.columns[12]: "COT_Pass2",
+#     df_raw.columns[13]: "COT_Pass3",
+#     df_raw.columns[14]: "COT_Pass4",
+#     df_raw.columns[15]: "COIL_dP_Pass1",
+#     df_raw.columns[16]: "COIL_dP_Pass2",
+#     df_raw.columns[17]: "COIL_dP_Pass3",
+#     df_raw.columns[18]: "COIL_dP_Pass4",
+#     df_raw.columns[19]: "BFW_Injection_Pass1",
+#     df_raw.columns[20]: "BFW_Injection_Pass2",
+#     df_raw.columns[21]: "BFW_Injection_Pass3",
+#     df_raw.columns[22]: "BFW_Injection_Pass4",
+#     df_raw.columns[23]: "MAX_SkinTemp_Pass1",
+#     df_raw.columns[24]: "Max_SkinTemp_Pass2",
+#     df_raw.columns[25]: "Max_SkinTemp_Pass3",
+#     df_raw.columns[26]: "Max_SkinTemp_Pass4",
+# }
+#
+# df_raw.rename(columns=renamed_columns, inplace=True)
+# df_cleaned = df_raw.drop(columns=[df_raw.columns[0], df_raw.columns[1]])
+# df_cleaned['timestamp'] = pd.to_datetime(df_cleaned['timestamp'], errors='coerce')
+# df_cleaned = df_cleaned.dropna(subset=['timestamp']).reset_index(drop=True)
+#
+# # ------------------------------
+# # Step 2: Load model and predict dP
+# # ------------------------------
+# reg_model = joblib.load('sad_days_predictor_2022.pkl')
+# feature_names = joblib.load('sad_feature_columns_2022.pkl')
+# df_cleaned['predicted_days_to_sad'] = reg_model.predict(df_cleaned[feature_names])
+#
+# # Show the minimum days prediction
+# min_pred = df_cleaned['predicted_days_to_sad'].min()
+# min_date = df_cleaned.loc[df_cleaned['predicted_days_to_sad'].idxmin(), 'timestamp']
+#
+# print(f"📅 Minimum predicted days to SAD: {min_pred:.1f} days")
+# print(f"📍 Predicted earliest SAD around: {min_date.date() + pd.Timedelta(days=min_pred):%d-%b-%Y}")
+
+
+# 2024 model , 2025 data
+import pandas as pd
+import numpy as np
+import joblib
+
+# ------------------------------
+# Step 1: Load and preprocess 2025 data
+import pandas as pd
+import joblib
+from datetime import datetime
+
+# ------------------------------
+# Step 1: Load and clean 2025 data
+import pandas as pd
+import joblib
+
+# ------------------------------
+# Step 1: Load and preprocess test data
+# ------------------------------
+import pandas as pd
+import joblib
+from datetime import datetime, timedelta
+
+# ------------------------------
+# Load model and feature columns once
+# ------------------------------
+reg_model = joblib.load('sad_days_predictor_all_years_merged.pkl')
+feature_names = joblib.load('sad_feature_columns_all_years_merged.pkl')
+
+
+# ------------------------------
+# Function for real-time SAD prediction
+# ------------------------------
+def predict_sad_from_input(data_dict):
+    """
+    Predicts SAD from a dictionary containing real-time furnace parameters.
+
+    Args:
+        data_dict (dict): Dictionary with feature values and an optional 'timestamp' key.
+
+    Returns:
+        None — prints prediction summary.
+    """
+
+    # Create single-row DataFrame from input
+    df_input = pd.DataFrame([data_dict])
+
+    # Convert timestamp if provided, else use current time
+    if 'timestamp' in df_input.columns:
+        df_input['timestamp'] = pd.to_datetime(df_input['timestamp'], errors='coerce')
+        timestamp = df_input['timestamp'].iloc[0]
+    else:
+        timestamp = pd.Timestamp.now()
+
+    # Ensure all required features exist
+    missing = [col for col in feature_names if col not in df_input.columns]
+    if missing:
+        print(f"❌ Missing required features: {missing}")
+        return
+
+    # Convert features to numeric
+    df_input[feature_names] = df_input[feature_names].apply(pd.to_numeric, errors='coerce')
+
+    if df_input[feature_names].isnull().values.any():
+        print("⚠️ Input contains non-numeric or missing values. Cannot predict.")
+        return
+
+    # Predict
+    prediction = reg_model.predict(df_input[feature_names])[0]
+    sad_estimate = timestamp + timedelta(days=float(prediction))
+
+    # Output
+    print("\n✅ Real-Time SAD Prediction")
+    print(f"📅 Input timestamp: {timestamp:%Y-%m-%d %H:%M}")
+    print(f"🧮 Predicted Days to SAD: {prediction:.1f}")
+    print(f"📍 Estimated SAD may occur around: {sad_estimate:%d-%b-%Y}")
+
+
+# ------------------------------
+# 🧪 Example Real-Time Input (Simulated)
+# ------------------------------
+# 11 / 21 / 2024
+# 9: 37
+# 24.94
+# 24.73
+# 24.82
+# 25.17
+# 17.5
+# 17.5
+# 17.5
+# 17.48
+# 485.4
+# 485.37
+# 479.37
+# 479.58
+# 18.86
+# 19.8
+# 20.43
+# 20.41
+# 310.03
+# 310.19
+# 310.28
+# 310.09
+# 558.04
+# 588.24
+# 600.37
+# 44.83
+
+#
+# example_input = {
+#     "timestamp": "2024-11-21   9:37",
+#     "Coil_Inlet_Pressure_Pass1": 24.94,
+#     "Coil_Inlet_Pressure_Pass2": 24.73,
+#     "Coil_Inlet_Pressure_Pass3": 24.82,
+#     "Coil_Inlet_Pressure_Pass4": 25.17,
+#     "FeedFlow_Pass1": 17.5 ,
+#     "FeedFlow_Pass2": 17.5,
+#     "FeedFlow_Pass3": 17.5,
+#     "FeedFlow_Pass4": 17.45,
+#     "COT_Pass1": 485.4,
+#     "COT_Pass2": 485.37,
+#     "COT_Pass3": 479.37,
+#     "COT_Pass4": 479.58,
+#     "COIL_dP_Pass1": 18.86,
+#     "COIL_dP_Pass2":19.8,
+#     "COIL_dP_Pass3": 20.43,
+#     "COIL_dP_Pass4": 20.41,
+#     "BFW_Injection_Pass1": 	310.03,
+#     "BFW_Injection_Pass2": 310.19,
+#     "BFW_Injection_Pass3": 	310.28,
+#     "BFW_Injection_Pass4": 310.09,
+#     "MAX_SkinTemp_Pass1": 558.04,
+#     "Max_SkinTemp_Pass2": 588.24,
+#     "Max_SkinTemp_Pass3": 600.37,
+#     "Max_SkinTemp_Pass4": 44.83
+# }
+# 06 - 12 - 2025
+# 00: 10
+# 25.17
+# 26.13
+# 26.72
+# 26.9
+# 20.93
+# 20.93
+# 20.93
+# 20.93
+# 489.43
+# 496.7
+# 496.78
+# 496.53
+# 20.02
+# 20.51
+# 21.37
+# 21.24
+# 298.67
+# 298.36
+# 298
+# 298.65
+# 570.22
+# 525.26
+# 553.17
+# 570.41
+
+example_input = {
+    "timestamp": "2025-06-14  00:10:00",
+    "Coil_Inlet_Pressure_Pass1": 25.17,
+    "Coil_Inlet_Pressure_Pass2": 26.13,
+    "Coil_Inlet_Pressure_Pass3": 26.72,
+    "Coil_Inlet_Pressure_Pass4": 26.9,
+    "FeedFlow_Pass1":20.93,
+    "FeedFlow_Pass2": 20.93,
+    "FeedFlow_Pass3": 20.93,
+    "FeedFlow_Pass4": 20.93,
+    "COT_Pass1": 489.43,
+    "COT_Pass2": 496.7,
+    "COT_Pass3": 496.78,
+    "COT_Pass4": 496.53,
+    "COIL_dP_Pass1": 22,
+    "COIL_dP_Pass2": 20.23,
+    "COIL_dP_Pass3": 21.37,
+    "COIL_dP_Pass4": 21.24,
+    "BFW_Injection_Pass1": 	298.67,
+    "BFW_Injection_Pass2": 298.36,
+    "BFW_Injection_Pass3": 	298,
+    "BFW_Injection_Pass4": 298.65,
+    "MAX_SkinTemp_Pass1": 590,
+    "Max_SkinTemp_Pass2": 600,
+    "Max_SkinTemp_Pass3": 612,
+    "Max_SkinTemp_Pass4": 44
+}
+
+
+# Run prediction
+predict_sad_from_input(example_input)
+
+# import pandas as pd
+# import numpy as np
+# import matplotlib.pyplot as plt
+# import joblib
+# from datetime import timedelta
+#
+# # Step 1: Load and preprocess 2025 data
+# df_raw = pd.read_csv('DCU - 2025.csv', header=4, skiprows=[0, 1, 2, 3])
+#
+# # Column renaming
+# renamed_columns = {
+#     df_raw.columns[2]: "timestamp",
+#     df_raw.columns[3]: "Coil_Inlet_Pressure_Pass1",
+#     df_raw.columns[4]: "Coil_Inlet_Pressure_Pass2",
+#     df_raw.columns[5]: "Coil_Inlet_Pressure_Pass3",
+#     df_raw.columns[6]: "Coil_Inlet_Pressure_Pass4",
+#     df_raw.columns[7]: "FeedFlow_Pass1",
+#     df_raw.columns[8]: "FeedFlow_Pass2",
+#     df_raw.columns[9]: "FeedFlow_Pass3",
+#     df_raw.columns[10]: "FeedFlow_Pass4",
+#     df_raw.columns[11]: "COT_Pass1",
+#     df_raw.columns[12]: "COT_Pass2",
+#     df_raw.columns[13]: "COT_Pass3",
+#     df_raw.columns[14]: "COT_Pass4",
+#     df_raw.columns[15]: "COIL_dP_Pass1",
+#     df_raw.columns[16]: "COIL_dP_Pass2",
+#     df_raw.columns[17]: "COIL_dP_Pass3",
+#     df_raw.columns[18]: "COIL_dP_Pass4",
+#     df_raw.columns[19]: "BFW_Injection_Pass1",
+#     df_raw.columns[20]: "BFW_Injection_Pass2",
+#     df_raw.columns[21]: "BFW_Injection_Pass3",
+#     df_raw.columns[22]: "BFW_Injection_Pass4",
+#     df_raw.columns[23]: "MAX_SkinTemp_Pass1",
+#     df_raw.columns[24]: "Max_SkinTemp_Pass2",
+#     df_raw.columns[25]: "Max_SkinTemp_Pass3",
+#     df_raw.columns[26]: "Max_SkinTemp_Pass4",
+# }
+# df_raw.rename(columns=renamed_columns, inplace=True)
+# df_cleaned = df_raw.drop(columns=[df_raw.columns[0], df_raw.columns[1]])
+# df_cleaned['timestamp'] = pd.to_datetime(df_cleaned['timestamp'], errors='coerce')
+# df_cleaned = df_cleaned.dropna(subset=['timestamp']).reset_index(drop=True)
+#
+# # Step 2: Load model trained to predict days_until_sad
+# model = joblib.load('regression_model_2022.pkl')
+# features = joblib.load('feature_columns_2022.pkl')
+#
+# # Predict days until SAD
+# df_cleaned['predicted_days_until_sad'] = model.predict(df_cleaned[features])
+#
+# # Step 3: Check when SAD may be required# print("🔍 Predicted Time to SAD (2025)")
+# imminent = df_cleaned[df_cleaned['predicted_days_until_sad'] <= 20]
+#
+# if not imminent.empty:
+#     # Get last known timestamp and prediction
+#     latest_row = df_cleaned.iloc[-1]
+#     latest_time = latest_row['timestamp']
+#     predicted_days = latest_row['predicted_days_until_sad']
+#     sad_forecast = latest_time + timedelta(days=predicted_days)
+#
+#     print(f"🧠 Latest data timestamp: {latest_time.strftime('%d-%b-%Y')}")
+#     print(f"🕒 Model predicts SAD in {predicted_days:.1f} days ➤ around {sad_forecast.strftime('%d-%b-%Y')}")
+#
+# else:
+#     print("✅ No SAD expected in the current 2025 dataset.")
+#
+# # Step 4: Plot predicted days until SAD over time
+# plt.figure(figsize=(12, 6))
+# plt.plot(df_cleaned['timestamp'], df_cleaned['predicted_days_until_sad'], label='Predicted Days Until SAD', color='blue')
+# plt.axhline(y=20, color='red', linestyle='--', label='SAD Warning Threshold (20 days)')
+#
+# if not imminent.empty:
+#     plt.axvline(x=imminent['timestamp'].max(), color='orange', linestyle='--', label='SAD Predicted Zone')
+#
+# plt.xlabel('Timestamp')
+# plt.ylabel('Predicted Days Until SAD')
+# plt.title('Predicted Time Until SAD vs Time (2025)')
+# plt.legend()
+# plt.grid(True)
+# plt.tight_layout()
+# plt.show()
+
+
+
