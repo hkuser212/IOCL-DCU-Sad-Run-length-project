@@ -1,3 +1,12 @@
+# --------------------------------------------
+# Project: DCU Furnace SAD Forecasting System
+# Author: Harsh Kumar | IOCL Summer Intern 2025
+# Description: Original model design, EDA, ML pipeline, and deployment done independently by the author.
+# Tools Used: Python, Pandas, XGBoost, Streamlit, SHAP
+# --------------------------------------------
+
+
+
 # # import pandas as pd
 # #
 # # df = pd.read_csv('DCU - 2021.csv', header=4)
