@@ -1,84 +1,77 @@
 # 🔥 DCU SAD Forecasting using Machine Learning
 
-This project forecasts **Shutdown and Decoking (SAD)** requirements for the **Delayed Coker Unit (DCU)** in a refinery, using **real-time furnace sensor data** and Machine Learning (XGBoost). The tool helps chemical engineers monitor conditions, anticipate shutdowns, and reduce operational risks.
-
-
----
-
-## 📌 Features
-
-- 📊 Predict **Days Until Next SAD**
-- 🧠 Uses XGBoost and LSTM for accurate time-series forecasting
-- 📈 Visual Timeline of SAD risk over time
-- 🔍 Feature Importance & Parameter Drift Analysis (2021–2025)
-- ⏱ Real-time input form and batch CSV upload support
-- 📍 Alerts for Critical, Warning, and Safe zones
+This project predicts **Shutdown and Decoking (SAD)** requirements for the **Delayed Coker Unit (DCU)** in a refinery using **furnace operating data** and advanced **machine learning models**. The system enables chemical engineers to monitor unit health, anticipate maintenance proactively, and optimize furnace runtime with minimal disruptions.
 
 ---
 
-## 🛠 Tech Stack
+## 📌 Key Features
 
-| Component | Tools Used |
-|----------|-------------|
-| Language | Python |
-| Dashboard | Streamlit |
-| ML Models | XGBoost, LSTM (Keras/TensorFlow) |
-| Data Processing | Pandas, NumPy |
-| Visualization | Matplotlib, Seaborn |
-| Model Serialization | Joblib, H5 |
-| Version Control | Git & GitHub |
+- ⏱ Predict **Days Until Next SAD** using sensor data
+- 📊 Visual Timeline: Track SAD risk over time
+- 🧠 Powered by **XGBoost Regression** for robust forecasting
+- 📁 Supports real-time input and batch **CSV file uploads**
+- 📍 Automatic alerts for **safe**, **warning**, and **critical** zones
+- 📈 Interactive visualizations of parameter trends
+- 🧪 Feature drift detection between past years and 2025
 
 ---
+
+## 🛠️ Tech Stack
+
+| Component       | Tool/Library                |
+|----------------|-----------------------------|
+| Language        | Python                      |
+| Dashboard       | Streamlit                   |
+| ML Model        | XGBoost                     |
+| Data Handling   | Pandas, NumPy               |
+| Visualization   | Matplotlib, Seaborn         |
+| Model I/O       | Joblib                      |
+| Deployment      | Localhost / GitHub Pages    |
 
 ---
 
 ## ⚙️ How It Works
 
-1. **Data Preprocessing**
-   - Historical SAD windows are labeled using known shutdown/feed-cut dates.
-   - Furnace parameters are cleaned and normalized.
+### 🔹 Data Labeling
 
-2. **Base Model Training**
-   - XGBoost is trained on 2021–2024 data to learn patterns before each SAD.
+- The model uses **historical SAD event dates (2021–2024)**.
+- Each day before a SAD is labeled with **`days_to_sad`**, counting down from ~365 to 0.
+- Only periods **1 year before each SAD event** are considered valid for training.
 
-3. **Pseudo-labeling for 2025**
-   - 2025 data (Jan–June) is pseudo-labeled using the base model.
-   - Retrained model adapts to 2025 operating behavior.
+### 🔹 Model Training Pipeline
 
-4. **Dashboard**
-   - Interactive web app built with Streamlit.
-   - Supports live sensor input and CSV batch prediction.
+1. **Base Model (2021–2024)**:
+   - Trained using XGBoost on true `days_to_sad` values.
+   - Captures pre-SAD behavior from past years.
 
-5. **Forecast**
-   - Predicts `Days_to_SAD`, plots trends, alerts engineers, and shows likely SAD dates.
+2. **Pseudo-Labeling (2025)**:
+   - 2025 furnace data is unlabeled (no SAD date yet).
+   - The base model predicts `pseudo_days_to_sad` on 2025 data.
 
----
+3. **Retraining on 2025**:
+   - Model is retrained using the pseudo-labeled 2025 data to adapt to new conditions.
 
-## 🚀 Quick Start
+4. **Deployment**:
+   - A user-friendly Streamlit dashboard takes live input or CSV uploads to make predictions and visualize insights.
 
-### ✅ 1. Clone the Repository
 
-```bash
-git clone https://github.com/your-username/dcu-sad-forecast.git
-cd dcu-sad-forecast
-✅ 2. Install Requirements
-bash
-Copy
-Edit
-pip install -r requirements.txt
-⚠️ Also install TensorFlow if using LSTM:
+Model Evaluation:-
 
-bash
-Copy
-Edit
-pip install tensorflow
-✅ 3. Run the Dashboard
-bash
-Copy
-Edit
-streamlit run dashboard.py
+| Model Type        | Training Dataset | R² Score | RMSE (days) |
+| ----------------- | ---------------- | -------- | ----------- |
+| XGBoost Base      | 2021–2024        | 0.96     | 12.5        |
+| XGBoost Retrained | 2025 (pseudo)    | 0.94     | 17.3        |
 
-💼 Use Cases
+
+🧠 Alerts & Thresholds:-
+
+| Days to SAD | Status      | Action                   |
+| ----------- | ----------- | ------------------------ |
+| > 90 days   | ✅ Healthy   | Normal operation         |
+| 30–90 days  | 🟡 Warning  | Start monitoring closely |
+| < 30 days   | 🔴 Critical | Plan shutdown soon       |
+
+💼 Use Cases:-
 📍 Shutdown Planning
 Predict optimal SAD dates months in advance.
 
@@ -87,3 +80,21 @@ Visualize how new furnace behavior (2025) differs from the past.
 
 📊 Parameter Analysis
 Track how individual sensor readings impact shutdown forecasts.
+
+🧠 Future Scope:-
+Live integration with refinery SCADA systems
+
+SMS/Email alerts for threshold breaches
+
+Integration with refinery-wide dashboards (like PI System)
+
+Streamlit images:-
+![image](https://github.com/user-attachments/assets/56ef1e0b-6989-4461-9038-2333a88472bc)
+![image](https://github.com/user-attachments/assets/96598682-da66-492e-b4d4-000cc0b97b6a)
+![image](https://github.com/user-attachments/assets/2aa1f099-e25c-4782-9eed-d472bde845c0)
+![image](https://github.com/user-attachments/assets/5ffaf54c-23df-42b4-bfc3-d567f63ec9c9)
+
+
+
+
+
