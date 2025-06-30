@@ -1,8 +1,7 @@
 # 🔥 DCU SAD Forecasting using Machine Learning
 
-This project forecasts **Shutdown and Decoking (SAD)** requirements for the **Delayed Coker Unit (DCU)** in a refinery, using **real-time furnace sensor data** and Machine Learning (XGBoost & LSTM). The tool helps chemical engineers monitor conditions, anticipate shutdowns, and reduce operational risks.
+This project forecasts **Shutdown and Decoking (SAD)** requirements for the **Delayed Coker Unit (DCU)** in a refinery, using **real-time furnace sensor data** and Machine Learning (XGBoost). The tool helps chemical engineers monitor conditions, anticipate shutdowns, and reduce operational risks.
 
-![Dashboard Preview](assets/dashboard_preview.png)
 
 ---
 
@@ -30,33 +29,6 @@ This project forecasts **Shutdown and Decoking (SAD)** requirements for the **De
 | Version Control | Git & GitHub |
 
 ---
-
-## 📁 Project Structure
-
-├── data/
-│ ├── DCU - 2025.csv
-│ ├── merged-csv-files.csv
-│
-├── models/
-│ ├── model_base_2021_24.pkl
-│ ├── model_retrained_2025.pkl
-│ ├── lstm_model_sad.h5
-│
-├── utils/
-│ ├── feature_processing.py
-│ └── model_utils.py
-│
-├── assets/
-│ └── dashboard_preview.png
-│
-├── dashboard.py
-├── train_model.py
-├── requirements.txt
-└── README.md
-
-yaml
-Copy
-Edit
 
 ---
 
@@ -105,3 +77,13 @@ bash
 Copy
 Edit
 streamlit run dashboard.py
+
+💼 Use Cases
+📍 Shutdown Planning
+Predict optimal SAD dates months in advance.
+
+🔬 Data Drift Detection
+Visualize how new furnace behavior (2025) differs from the past.
+
+📊 Parameter Analysis
+Track how individual sensor readings impact shutdown forecasts.
