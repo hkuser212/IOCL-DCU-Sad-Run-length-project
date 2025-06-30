@@ -94,6 +94,13 @@ Streamlit images:-
 ![image](https://github.com/user-attachments/assets/2aa1f099-e25c-4782-9eed-d472bde845c0)
 ![image](https://github.com/user-attachments/assets/5ffaf54c-23df-42b4-bfc3-d567f63ec9c9)
 
+🧾 License
+This project is licensed under the MIT License.
+Feel free to use, modify, and share with attribution.
+
+👨‍💻 Author
+Harsh Kumar
+Machine Learning Intern @ IOCL
 
 
 
