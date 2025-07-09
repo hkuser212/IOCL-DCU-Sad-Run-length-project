@@ -88,11 +88,14 @@ if uploaded_file is not None:
         'DEGC.6': 'Max_SkinTemp_Pass3',
         'DEGC.7': 'Max_SkinTemp_Pass4',
     }
-    df.rename(columns=column_mapping, inplace=True)
     print("✅ Available columns after rename:")
     print(df.columns.tolist())
-    # Rename columns
+     # Rename columns
     df.rename(columns=column_mapping, inplace=True)
+    # Correct timestamp parsing
+    df['timestamp'] = pd.to_datetime(df['timestamp'], dayfirst=False, errors='coerce')
+
+    st.write("🟢 Valid timestamps:", df['timestamp'].min(), "to", df['timestamp'].max())
 
     # Ensure required features are present
     missing = [f for f in features if f not in df.columns]
@@ -104,8 +107,6 @@ if uploaded_file is not None:
             df[f] = pd.to_numeric(df[f], errors='coerce')
 
         df.dropna(subset=features, inplace=True)
-        df['Timestamp'] = pd.to_datetime(df['timestamp'], dayfirst=False, errors='coerce')
-        st.write("🟢 Valid timestamps:", df['timestamp'].min(), "to", df['timestamp'].max())
         st.write("🔢 Rows retained after cleanup:", df.shape[0])
 
         if df.empty:
